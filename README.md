@@ -1,6 +1,5 @@
-[README.md](https://github.com/user-attachments/files/28040179/README.md)
 # CustomerMeetingNotes
-Notes for Customer Meetings # CSU Meeting Note — Zivid
+Notes for Customer Meetings 
 
 HubSpot과 연동되는 미팅 노트 작성 앱입니다.  
 GitHub Pages로 바로 배포해서 사용할 수 있어요.
@@ -24,13 +23,3 @@ GitHub Pages로 바로 배포해서 사용할 수 있어요.
 | HubSpot MCP | Anthropic API에서 HubSpot MCP 사용 권한 필요 |
 
 ---
-
-## 파일 구조
-
-```
-csu-meeting-note/
-└── index.html   # 앱 전체 (HTML + CSS + JS 단일 파일)
-```
-
-단일 HTML 파일이라 별도 빌드 과정 없이 바로 배포 가능합니다.
-

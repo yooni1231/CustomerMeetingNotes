@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CSU Meeting Note · Zivid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.3.0/dist/tabler-icons.min.css" />
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f6f3;--surface:#ffffff;--surface2:#f0efe9;
+  --border:#e2e0d8;--border2:#ccc9be;
+  --text:#1a1916;--text2:#6b6860;--text3:#9b9890;
+  --accent-bg:#1a1916;--accent-text:#f7f6f3;
+  --green:#1d6b4a;--green-bg:#e6f4ee;
+  --red:#b03a2e;--red-bg:#fdf0ee;
+  --radius:10px;--radius-sm:6px;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);
+}
+body{background:var(--bg);min-height:100vh}
+
+/* ── Layout ── */
+.app{max-width:740px;margin:0 auto;padding:2rem 1.25rem 5rem}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2.25rem}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;background:var(--text);border-radius:50%}
+.logo-label{font-size:13px;font-weight:500;letter-spacing:.04em;color:var(--text2)}
+.step-indicator{display:flex;gap:6px}
+.step{width:24px;height:4px;border-radius:2px;background:var(--border);transition:.3s}
+.step.active{background:var(--text)}
+.step.done{background:var(--border2)}
+
+/* ── Config banner ── */
+.config-banner{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:1.5rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.config-banner label{font-size:12px;color:var(--text2);white-space:nowrap}
+.config-banner input{flex:1;min-width:220px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none}
+.config-banner input:focus{border-color:var(--border2)}
+.config-banner input::placeholder{color:var(--text3)}
+.config-banner button{background:var(--accent-bg);color:var(--accent-text);border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.key-saved{font-size:12px;color:var(--green);display:flex;align-items:center;gap:4px}
+
+/* ── Screens ── */
+.screen{display:none}
+.screen.visible{display:block}
+
+/* ── Search ── */
+.screen-title{font-size:22px;font-weight:500;margin-bottom:6px}
+.screen-sub{font-size:14px;color:var(--text2);margin-bottom:1.5rem}
+.search-row{display:flex;gap:8px;margin-bottom:1rem}
+.search-row input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none}
+.search-row input:focus{border-color:var(--border2)}
+.btn-primary{background:var(--accent-bg);color:var(--accent-text);border:none;border-radius:var(--radius-sm);padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:6px}
+.btn-primary:hover{opacity:.87}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 18px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--text2)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+
+.result-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 16px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:.15s}
+.result-item:hover{border-color:var(--border2)}
+.result-item.selected{border-color:var(--text)}
+.result-name{font-weight:500}
+.result-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.result-check{width:18px;height:18px;border-radius:50%;background:var(--text);display:flex;align-items:center;justify-content:center;opacity:0;flex-shrink:0;transition:.15s}
+.result-item.selected .result-check{opacity:1}
+.result-check i{font-size:11px;color:var(--accent-text)}
+.skip-link{font-size:13px;color:var(--text2);cursor:pointer;text-decoration:underline;text-underline-offset:2px;margin-top:10px;display:inline-block}
+.skip-link:hover{color:var(--text)}
+
+/* ── Form ── */
+.form-header{margin-bottom:1.5rem}
+.form-title{font-size:20px;font-weight:500}
+.assoc-badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text2);margin-top:8px}
+.assoc-badge span{color:var(--text);font-weight:500}
+
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.sec-header{padding:12px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;transition:.15s}
+.sec-header:hover{background:var(--surface2)}
+.sec-label{font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text2)}
+.sec-body{padding:0 16px 16px;display:none}
+.sec-body.open{display:block}
+.chevron{font-size:16px;color:var(--text3);transition:.2s;display:inline-block}
+.chevron.open{transform:rotate(180deg)}
+
+.field{margin-top:12px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;font-weight:500;letter-spacing:.02em}
+.field input[type=text],.field input[type=date],.field input[type=datetime-local],.field textarea,.field select{
+  width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;resize:vertical
+}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--border2);background:var(--surface)}
+.field textarea{min-height:68px;line-height:1.6}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.radio-group{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.radio-pill{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;user-select:none;background:var(--bg);transition:.15s}
+.radio-pill:hover{border-color:var(--border2)}
+.radio-pill.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+
+.check-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.check-pill{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;user-select:none;background:var(--bg);transition:.15s}
+.check-pill:hover{border-color:var(--border2)}
+.check-pill.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.check-pill input{display:none}
+
+/* ── File Upload ── */
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:1.5rem;text-align:center;cursor:pointer;transition:.15s;background:var(--bg);margin-top:4px;position:relative}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--text);background:var(--surface2)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:28px;color:var(--text3);margin-bottom:8px}
+.upload-text{font-size:13px;color:var(--text2)}
+.upload-hint{font-size:11px;color:var(--text3);margin-top:4px}
+
+.file-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.file-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;display:flex;align-items:center;gap:10px}
+.file-item-icon{font-size:18px;color:var(--text2);flex-shrink:0}
+.file-item-name{flex:1;font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-item-size{font-size:11px;color:var(--text3);flex-shrink:0}
+.file-item-remove{font-size:16px;color:var(--text3);cursor:pointer;flex-shrink:0;transition:.15s}
+.file-item-remove:hover{color:var(--red)}
+.file-preview{width:100%;max-height:180px;object-fit:contain;border-radius:var(--radius-sm);margin-top:6px;border:1px solid var(--border)}
+.file-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500}
+.tag-zdf{background:#e8edf5;color:#2a4a7f}
+.tag-png{background:#eaf3e0;color:#2a6030}
+
+/* ── Actions ── */
+.action-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.action-row{display:flex;gap:6px;align-items:center}
+.action-row select{width:80px;flex-shrink:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none}
+.action-row input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none}
+.action-row input:focus,.action-row select:focus{border-color:var(--border2)}
+.action-row-remove{font-size:16px;color:var(--text3);cursor:pointer;flex-shrink:0}
+.action-row-remove:hover{color:var(--red)}
+.add-action-btn{font-size:12px;color:var(--text2);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:4px}
+.add-action-btn:hover{color:var(--text)}
+
+.btn-row{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem}
+.loading-msg{font-size:13px;color:var(--text2);text-align:center;margin-top:8px;min-height:20px}
+
+/* ── Success ── */
+.success-wrap{text-align:center;padding:3rem 1rem}
+.success-icon{width:52px;height:52px;background:var(--green-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}
+.success-icon i{font-size:24px;color:var(--green)}
+.success-title{font-size:20px;font-weight:500;margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--text2);margin-bottom:1.5rem}
+.note-preview{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;text-align:left;font-size:12px;font-family:'DM Mono',monospace;line-height:1.8;color:var(--text2);max-height:220px;overflow-y:auto;margin-bottom:1.5rem;white-space:pre-wrap}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:var(--accent-text);padding:10px 16px;border-radius:var(--radius-sm);font-size:13px;display:none;z-index:999;max-width:300px}
+
+@media(max-width:520px){.field-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <span class="logo-label">CSU Meeting Note</span>
+    </div>
+    <div class="step-indicator">
+      <div class="step active" id="s1"></div>
+      <div class="step" id="s2"></div>
+      <div class="step" id="s3"></div>
+    </div>
+  </div>
+
+  <!-- API Key config -->
+  <div class="config-banner" id="config-banner">
+    <i class="ti ti-key" style="font-size:16px;color:var(--text2)" aria-hidden="true"></i>
+    <label>Anthropic API Key</label>
+    <input type="password" id="api-key-input" placeholder="sk-ant-..." />
+    <button onclick="saveKey()">저장</button>
+    <div class="key-saved" id="key-saved" style="display:none">
+      <i class="ti ti-circle-check" style="font-size:14px" aria-hidden="true"></i> 저장됨
+    </div>
+  </div>
+
+  <!-- ─── Screen 1: Search ─── -->
+  <div class="screen visible" id="screen-search">
+    <div class="screen-title">HubSpot 연락처 검색</div>
+    <div class="screen-sub">노트를 연결할 고객을 먼저 찾아보세요.</div>
+    <div class="search-row">
+      <input type="text" id="search-input" placeholder="회사명 또는 이름 입력..." />
+      <button class="btn-primary" id="search-btn" onclick="doSearch()">
+        <i class="ti ti-search" aria-hidden="true"></i> 검색
+      </button>
+    </div>
+    <div id="search-results"></div>
+    <div class="loading-msg" id="search-loading"></div>
+    <span class="skip-link" onclick="goToForm(null)">연결 없이 바로 양식 작성 →</span>
+  </div>
+
+  <!-- ─── Screen 2: Form ─── -->
+  <div class="screen" id="screen-form">
+    <div class="form-header">
+      <div class="form-title">미팅 노트 작성</div>
+      <div id="assoc-info"></div>
+    </div>
+
+    <!-- 기본 정보 -->
+    <div class="section">
+      <div class="sec-header" onclick="toggleSec(this)">
+        <span class="sec-label">📅 기본 정보</span>
+        <span class="chevron open">▾</span>
+      </div>
+      <div class="sec-body open">
+        <div class="field-row">
+          <div class="field"><label>미팅 일시</label><input type="datetime-local" id="f-date" /></div>
+          <div class="field"><label>미팅 유형</label>
+            <div class="radio-group" data-rg="meeting">
+              <div class="radio-pill on" onclick="pickRadio(this)">Onboarding</div>
+              <div class="radio-pill" onclick="pickRadio(this)">Follow-up</div>
+              <div class="radio-pill" onclick="pickRadio(this)">Technical</div>
+              <div class="radio-pill" onclick="pickRadio(this)">Onsite</div>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>참석자 (고객)</label><input type="text" id="f-att-customer" placeholder="이름, 직책" /></div>
+          <div class="field"><label>참석자 (Zivid)</label><input type="text" id="f-att-zivid" placeholder="이름" /></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 고객 정보 -->
+    <div class="section">
+      <div class="sec-header" onclick="toggleSec(this)">
+        <span class="sec-label">🏢 고객 정보</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="sec-body">
+        <div class="field"><label>기술 역량 수준</label>
+          <div class="radio-group" data-rg="skill">
+            <div class="radio-pill" onclick="pickRadio(this)">Beginner</div>
+            <div class="radio-pill" onclick="pickRadio(this)">Intermediate</div>
+            <div class="radio-pill" onclick="pickRadio(this)">Advanced</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 로봇 & 환경 -->
+    <div class="section">
+      <div class="sec-header" onclick="toggleSec(this)">
+        <span class="sec-label">🤖 로봇 & 시스템 환경</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="sec-body">
+        <div class="field-row">
+          <div class="field"><label>로봇 브랜드 / 모델명</label><input type="text" id="f-robot" placeholder="예: UR5e, FANUC M-10iA" /></div>
+          <div class="field"><label>로봇 타입</label>
+            <div class="radio-group" data-rg="robot-type">
+              <div class="radio-pill" onclick="pickRadio(this)">Collaborative</div>
+              <div class="radio-pill" onclick="pickRadio(this)">Industrial</div>
+              <div class="radio-pill" onclick="pickRadio(this)">미정</div>
+            </div>
+          </div>
+        </div>
+        <div class="field"><label>OS</label><input type="text" id="f-os" placeholder="예: Ubuntu 22.04, Windows 11" /></div>
+        <div class="field"><label>프로그래밍 언어</label>
+          <div class="check-group" id="cg-lang">
+            <label class="check-pill"><input type="checkbox" value="Python" onchange="toggleCheck(this)">Python</label>
+            <label class="check-pill"><input type="checkbox" value="C++" onchange="toggleCheck(this)">C++</label>
+            <label class="check-pill"><input type="checkbox" value="C#" onchange="toggleCheck(this)">C#</label>
+            <label class="check-pill"><input type="checkbox" value="ROS" onchange="toggleCheck(this)">ROS</label>
+            <label class="check-pill"><input type="checkbox" value="Halcon" onchange="toggleCheck(this)">Halcon</label>
+            <label class="check-pill"><input type="checkbox" value="Matlab" onchange="toggleCheck(this)">Matlab</label>
+          </div>
+        </div>
+        <div class="field"><label>3rd party 라이브러리</label><input type="text" id="f-3rdparty" placeholder="예: OpenCV, PCL, MoveIt" /></div>
+      </div>
+    </div>
+
+    <!-- Application & 프로젝트 -->
+    <div class="section">
+      <div class="sec-header" onclick="toggleSec(this)">
+        <span class="sec-label">📦 Application & 프로젝트</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="sec-body">
+        <div class="field"><label>Application 설명</label><textarea id="f-app-desc" placeholder="고객이 만들려는 것..."></textarea></div>
+        <div class="field"><label>Imaging 대상 (물체/장면)</label><input type="text" id="f-imaging" placeholder="예: 금속 부품, 박스 피킹" /></div>
+        <div class="field"><label>핵심 목표</label><input type="text" id="f-goals" placeholder="예: 속도 < 2s, 정확도 ±1mm" /></div>
+        <div class="field"><label>고객이 달성하려는 것</label><textarea id="f-objective" placeholder="고객의 최종 목표..."></textarea></div>
+        <div class="field"><label>막힌 부분 / 혼자 찾지 못한 것</label><textarea id="f-blocked" placeholder="어디서 막혔는지..."></textarea></div>
+
+        <!-- File Upload -->
+        <div class="field">
+          <label>참고 파일 첨부 <span style="color:var(--text3);font-weight:400">(ZDF · PNG)</span></label>
+          <div class="upload-zone" id="upload-zone"
+               ondragover="onDragOver(event)"
+               ondragleave="onDragLeave(event)"
+               ondrop="onDrop(event)">
+            <input type="file" id="file-input" accept=".zdf,.png,image/png" multiple onchange="onFileSelect(event)" />
+            <div class="upload-icon"><i class="ti ti-cloud-upload" aria-hidden="true"></i></div>
+            <div class="upload-text">클릭하거나 파일을 여기로 드래그하세요</div>
+            <div class="upload-hint">.zdf · .png 파일 지원 · 여러 파일 선택 가능</div>
+          </div>
+          <div class="file-list" id="file-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 규모 & 타임라인 -->
+    <div class="section">
+      <div class="sec-header" onclick="toggleSec(this)">
+        <span class="sec-label">📊 규모 & 타임라인</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="sec-body">
+        <div class="field-row">
+          <div class="field"><label>예상 카메라 구매 수량</label><input type="text" id="f-qty" placeholder="예: 5대" /></div>
+          <div class="field"><label>배포 사이트 수</label><input type="text" id="f-sites" placeholder="예: 3곳" /></div>
+        </div>
+        <div class="field"><label>프로젝트 규모 / 단계</label><input type="text" id="f-scale" placeholder="예: Pilot → 전체 라인 확대" /></div>
+        <div class="field-row">
+          <div class="field"><label>Evaluation 완료 목표</label><input type="date" id="f-eval" /></div>
+          <div class="field"><label>Go-live 목표일</label><input type="date" id="f-golive" /></div>
+        </div>
+        <div class="field"><label>프로젝트 난이도 (CSU 평가)</label>
+          <div class="radio-group" data-rg="difficulty">
+            <div class="radio-pill" onclick="pickRadio(this)">Low</div>
+            <div class="radio-pill" onclick="pickRadio(this)">Medium</div>
+            <div class="radio-pill" onclick="pickRadio(this)">High</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CSU 지원 예측 -->
+    <div class="section">
+      <div class="sec-header" onclick="toggleSec(this)">
+        <span class="sec-label">🛠️ CSU 지원 예측</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="sec-body">
+        <div class="field"><label>예상 지원 규모</label>
+          <div class="radio-group" data-rg="support">
+            <div class="radio-pill" onclick="pickRadio(this)">Light</div>
+            <div class="radio-pill" onclick="pickRadio(this)">Medium</div>
+            <div class="radio-pill" onclick="pickRadio(this)">Heavy</div>
+          </div>
+        </div>
+        <div class="field"><label>잠재적 이슈 / 주의사항</label><textarea id="f-risks" placeholder="예상되는 기술적 도전..."></textarea></div>
+        <div class="field"><label>Zivid가 도울 수 있는 부분</label><textarea id="f-zivid-help" placeholder="우리가 제공할 수 있는 것..."></textarea></div>
+      </div>
+    </div>
+
+    <!-- 액션 아이템 -->
+    <div class="section">
+      <div class="sec-header" onclick="toggleSec(this)">
+        <span class="sec-label">✅ 액션 아이템</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="sec-body">
+        <div class="action-list" id="action-list">
+          <div class="action-row">
+            <select><option>CSU</option><option>고객</option></select>
+            <input type="text" placeholder="액션 아이템 내용..." />
+            <i class="ti ti-x action-row-remove" onclick="removeAction(this)" aria-hidden="true"></i>
+          </div>
+          <div class="action-row">
+            <select><option>CSU</option><option>고객</option></select>
+            <input type="text" placeholder="액션 아이템 내용..." />
+            <i class="ti ti-x action-row-remove" onclick="removeAction(this)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="add-action-btn" onclick="addAction()">
+          <i class="ti ti-plus" style="font-size:13px" aria-hidden="true"></i> 항목 추가
+        </div>
+        <div class="field"><label>다음 미팅 일정</label><input type="date" id="f-next-meeting" /></div>
+      </div>
+    </div>
+
+    <!-- 기타 메모 -->
+    <div class="section">
+      <div class="sec-header" onclick="toggleSec(this)">
+        <span class="sec-label">📝 기타 메모</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="sec-body">
+        <div class="field"><textarea id="f-memo" placeholder="추가 메모..." style="min-height:80px"></textarea></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-ghost" onclick="goBack()">← 뒤로</button>
+      <button class="btn-primary" id="save-btn" onclick="saveNote()">
+        <i class="ti ti-brand-hipchat" aria-hidden="true"></i> HubSpot에 저장
+      </button>
+    </div>
+    <div class="loading-msg" id="save-loading"></div>
+  </div>
+
+  <!-- ─── Screen 3: Success ─── -->
+  <div class="screen" id="screen-success">
+    <div class="success-wrap">
+      <div class="success-icon"><i class="ti ti-check" aria-hidden="true"></i></div>
+      <div class="success-title">HubSpot에 저장됐어요!</div>
+      <div class="success-sub" id="success-sub"></div>
+      <div class="note-preview" id="note-preview"></div>
+      <button class="btn-primary" onclick="resetAll()">
+        <i class="ti ti-plus" aria-hidden="true"></i> 새 미팅 노트 작성
+      </button>
+    </div>
+  </div>
+
+</div><!-- .app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── State ── */
+let selectedContact = null;
+let uploadedFiles = []; // {file, name, type, previewUrl, base64}
+
+/* ── API Key ── */
+function saveKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val) { showToast('API Key를 입력하세요'); return; }
+  sessionStorage.setItem('anthro_key', val);
+  document.getElementById('key-saved').style.display = 'flex';
+  document.getElementById('api-key-input').value = '••••••••••••••••';
+  showToast('API Key가 저장됐어요');
+}
+function getKey() { return sessionStorage.getItem('anthro_key') || ''; }
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (getKey()) {
+    document.getElementById('key-saved').style.display = 'flex';
+    document.getElementById('api-key-input').placeholder = '저장된 키 사용 중';
+  }
+  const now = new Date();
+  const local = new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  document.getElementById('f-date').value = local;
+});
+
+/* ── Toast ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.style.display = 'none', 2500);
+}
+
+/* ── Steps ── */
+function setScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
+  const order = ['screen-search', 'screen-form', 'screen-success'];
+  const idx = order.indexOf(id);
+  ['s1','s2','s3'].forEach((s, i) => {
+    const el = document.getElementById(s);
+    el.classList.remove('active', 'done');
+    if (i === idx) el.classList.add('active');
+    else if (i < idx) el.classList.add('done');
+  });
+}
+
+/* ── Section accordion ── */
+function toggleSec(header) {
+  const body = header.nextElementSibling;
+  const chev = header.querySelector('.chevron');
+  const open = body.classList.toggle('open');
+  chev.classList.toggle('open', open);
+}
+
+/* ── Radio / Checkbox ── */
+function pickRadio(el) {
+  const group = el.closest('.radio-group');
+  group.querySelectorAll('.radio-pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+}
+function getRadio(rgAttr) {
+  const el = document.querySelector(`.radio-group[data-rg="${rgAttr}"] .radio-pill.on`);
+  return el ? el.textContent.trim() : '-';
+}
+function toggleCheck(input) {
+  input.closest('.check-pill').classList.toggle('on', input.checked);
+}
+function getChecked(groupId) {
+  return [...document.querySelectorAll(`#${groupId} input:checked`)].map(i => i.value);
+}
+
+/* ── File Upload ── */
+function onDragOver(e) { e.preventDefault(); document.getElementById('upload-zone').classList.add('dragover'); }
+function onDragLeave(e) { document.getElementById('upload-zone').classList.remove('dragover'); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('dragover');
+  handleFiles([...e.dataTransfer.files]);
+}
+function onFileSelect(e) { handleFiles([...e.target.files]); e.target.value = ''; }
+
+function handleFiles(files) {
+  files.forEach(file => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['zdf','png'].includes(ext)) { showToast(`${file.name}: ZDF 또는 PNG 파일만 가능해요`); return; }
+    if (uploadedFiles.find(f => f.name === file.name)) { showToast(`${file.name}: 이미 추가됐어요`); return; }
+    const entry = { file, name: file.name, ext, previewUrl: null, base64: null };
+    if (ext === 'png') {
+      const reader = new FileReader();
+      reader.onload = e => {
+        entry.previewUrl = e.target.result;
+        entry.base64 = e.target.result.split(',')[1];
+        renderFileList();
+      };
+      reader.readAsDataURL(file);
+    }
+    uploadedFiles.push(entry);
+    renderFileList();
+  });
+}
+
+function removeFile(name) {
+  uploadedFiles = uploadedFiles.filter(f => f.name !== name);
+  renderFileList();
+}
+
+function renderFileList() {
+  const list = document.getElementById('file-list');
+  list.innerHTML = '';
+  uploadedFiles.forEach(f => {
+    const item = document.createElement('div');
+    item.innerHTML = `
+      <div class="file-item">
+        <i class="ti ${f.ext === 'png' ? 'ti-photo' : 'ti-cube'} file-item-icon" aria-hidden="true"></i>
+        <span class="file-item-name">${f.name}</span>
+        <span class="file-tag ${f.ext === 'zdf' ? 'tag-zdf' : 'tag-png'}">${f.ext.toUpperCase()}</span>
+        <span class="file-item-size">${(f.file.size / 1024).toFixed(0)} KB</span>
+        <i class="ti ti-x file-item-remove" onclick="removeFile('${f.name}')" aria-hidden="true"></i>
+      </div>
+      ${f.previewUrl ? `<img class="file-preview" src="${f.previewUrl}" alt="${f.name}" />` : ''}
+    `;
+    list.appendChild(item);
+  });
+}
+
+/* ── Actions ── */
+function addAction() {
+  const list = document.getElementById('action-list');
+  const row = document.createElement('div');
+  row.className = 'action-row';
+  row.innerHTML = `<select><option>CSU</option><option>고객</option></select><input type="text" placeholder="액션 아이템 내용..." /><i class="ti ti-x action-row-remove" onclick="removeAction(this)" aria-hidden="true"></i>`;
+  list.appendChild(row);
+}
+function removeAction(el) { el.closest('.action-row').remove(); }
+
+/* ── Search ── */
+async function doSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  if (!q) { showToast('검색어를 입력하세요'); return; }
+  const key = getKey();
+  if (!key) { showToast('먼저 API Key를 저장하세요'); return; }
+  const btn = document.getElementById('search-btn');
+  const loading = document.getElementById('search-loading');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2" aria-hidden="true"></i> 검색 중...';
+  loading.textContent = 'HubSpot에서 찾는 중...';
+  document.getElementById('search-results').innerHTML = '';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'Search HubSpot for contacts and companies. Return ONLY a valid JSON array (no markdown, no extra text) of up to 5 results. Each object: {id, name, type ("contact"|"company"), email, company}. If nothing found return [].',
+        messages: [{ role: 'user', content: 'Search for: ' + q }],
+        mcp_servers: [{ type: 'url', url: 'https://mcp.hubspot.com/anthropic', name: 'hubspot' }]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
+    let results = [];
+    try { results = JSON.parse(text.replace(/```json|```/g, '').trim()); } catch(e) {}
+    renderResults(results);
+  } catch(e) {
+    document.getElementById('search-results').innerHTML = '<p style="color:var(--text2);font-size:13px">검색 중 오류가 발생했습니다.</p>';
+  }
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-search" aria-hidden="true"></i> 검색';
+  loading.textContent = '';
+}
+
+function renderResults(results) {
+  const c = document.getElementById('search-results');
+  if (!results || results.length === 0) {
+    c.innerHTML = '<p style="color:var(--text2);font-size:13px;margin-bottom:10px">결과가 없어요. 다른 키워드로 검색하거나 아래 링크로 바로 작성하세요.</p>';
+    return;
+  }
+  c.innerHTML = '';
+  results.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.innerHTML = `<div><div class="result-name">${r.name || '-'}</div><div class="result-meta">${r.type === 'contact' ? '연락처' : '회사'}${r.email ? ' · ' + r.email : ''}${r.company ? ' · ' + r.company : ''}</div></div><div class="result-check"><i class="ti ti-check" aria-hidden="true"></i></div>`;
+    div.onclick = () => {
+      document.querySelectorAll('.result-item').forEach(i => i.classList.remove('selected'));
+      div.classList.add('selected');
+      selectedContact = r;
+    };
+    c.appendChild(div);
+  });
+  const btn = document.createElement('button');
+  btn.className = 'btn-primary';
+  btn.style.marginTop = '12px';
+  btn.innerHTML = '<i class="ti ti-arrow-right" aria-hidden="true"></i> 선택한 연락처로 작성';
+  btn.onclick = () => { if (selectedContact) goToForm(selectedContact); else showToast('연락처를 먼저 선택하세요'); };
+  c.appendChild(btn);
+}
+
+/* ── Navigation ── */
+function goToForm(contact) {
+  selectedContact = contact;
+  const info = document.getElementById('assoc-info');
+  info.innerHTML = contact
+    ? `<div class="assoc-badge"><i class="ti ti-link" style="font-size:13px" aria-hidden="true"></i> 연결됨: <span>${contact.name}</span></div>`
+    : `<div class="assoc-badge" style="color:var(--text3)"><i class="ti ti-unlink" style="font-size:13px" aria-hidden="true"></i> 연결된 연락처 없음</div>`;
+  setScreen('screen-form');
+}
+function goBack() { setScreen('screen-search'); }
+
+/* ── Build note text ── */
+function buildNote() {
+  const v = id => (document.getElementById(id)?.value || '').trim() || '-';
+  const langs = getChecked('cg-lang');
+  const actions = [...document.querySelectorAll('.action-row')]
+    .map(r => { const s = r.querySelector('select')?.value; const t = r.querySelector('input')?.value?.trim(); return t ? `• [${s}] ${t}` : ''; })
+    .filter(Boolean).join('\n') || '-';
+  const files = uploadedFiles.length
+    ? uploadedFiles.map(f => `• ${f.name} (${f.ext.toUpperCase()}, ${(f.file.size/1024).toFixed(0)} KB)`).join('\n')
+    : '-';
+
+  return [
+    `📅 미팅 일시: ${v('f-date').replace('T',' ')}`,
+    `📋 미팅 유형: ${getRadio('meeting')}`,
+    `👤 참석자 (고객): ${v('f-att-customer')}`,
+    `👤 참석자 (Zivid): ${v('f-att-zivid')}`,
+    ``,
+    `━━━ 고객 정보 ━━━`,
+    `기술 역량: ${getRadio('skill')}`,
+    ``,
+    `━━━ 로봇 & 환경 ━━━`,
+    `로봇: ${v('f-robot')} / ${getRadio('robot-type')}`,
+    `OS: ${v('f-os')}`,
+    `언어: ${langs.length ? langs.join(', ') : '-'}`,
+    `3rd party: ${v('f-3rdparty')}`,
+    ``,
+    `━━━ Application & 프로젝트 ━━━`,
+    `Application: ${v('f-app-desc')}`,
+    `Imaging 대상: ${v('f-imaging')}`,
+    `핵심 목표: ${v('f-goals')}`,
+    `고객 목표: ${v('f-objective')}`,
+    `막힌 부분: ${v('f-blocked')}`,
+    `첨부 파일:\n${files}`,
+    ``,
+    `━━━ 규모 & 타임라인 ━━━`,
+    `카메라 수량: ${v('f-qty')} / 사이트: ${v('f-sites')}`,
+    `프로젝트 규모: ${v('f-scale')}`,
+    `Evaluation 완료: ${v('f-eval')} / Go-live: ${v('f-golive')}`,
+    `난이도: ${getRadio('difficulty')}`,
+    ``,
+    `━━━ CSU 지원 예측 ━━━`,
+    `지원 규모: ${getRadio('support')}`,
+    `잠재적 이슈: ${v('f-risks')}`,
+    `Zivid 기여: ${v('f-zivid-help')}`,
+    ``,
+    `━━━ 액션 아이템 ━━━`,
+    actions,
+    `다음 미팅: ${v('f-next-meeting')}`,
+    ``,
+    `━━━ 기타 메모 ━━━`,
+    v('f-memo'),
+  ].join('\n');
+}
+
+/* ── Save to HubSpot ── */
+async function saveNote() {
+  const key = getKey();
+  if (!key) { showToast('먼저 API Key를 저장하세요'); return; }
+  const noteText = buildNote();
+  const btn = document.getElementById('save-btn');
+  const loading = document.getElementById('save-loading');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2" aria-hidden="true"></i> 저장 중...';
+  loading.textContent = 'HubSpot에 노트를 저장하는 중...';
+
+  const contactCtx = selectedContact
+    ? `Associate this note with ${selectedContact.type} named "${selectedContact.name}" (id: ${selectedContact.id}).`
+    : 'No specific contact association needed.';
+
+  // Build messages - include PNG images if available
+  const userContent = [];
+  const pngFiles = uploadedFiles.filter(f => f.ext === 'png' && f.base64);
+  pngFiles.forEach(f => {
+    userContent.push({ type: 'image', source: { type: 'base64', media_type: 'image/png', data: f.base64 } });
+  });
+  userContent.push({ type: 'text', text: `Save this as a HubSpot note:\n\n${noteText}${pngFiles.length ? '\n\n(PNG images are attached above for visual reference — mention them in the note)' : ''}` });
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are a HubSpot assistant. Create a note engagement in HubSpot with the provided text. ${contactCtx} Reply with only: SAVED_OK`,
+        messages: [{ role: 'user', content: userContent }],
+        mcp_servers: [{ type: 'url', url: 'https://mcp.hubspot.com/anthropic', name: 'hubspot' }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    document.getElementById('success-sub').textContent = selectedContact
+      ? `"${selectedContact.name}"에 연결된 노트가 저장되었습니다.`
+      : 'HubSpot에 노트가 저장되었습니다.';
+    document.getElementById('note-preview').textContent = noteText;
+    setScreen('screen-success');
+  } catch(e) {
+    showToast('저장 중 오류가 발생했습니다: ' + e.message);
+  }
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-brand-hipchat" aria-hidden="true"></i> HubSpot에 저장';
+  loading.textContent = '';
+}
+
+/* ── Reset ── */
+function resetAll() {
+  selectedContact = null; uploadedFiles = [];
+  document.querySelectorAll('input[type=text],input[type=date],input[type=datetime-local],textarea').forEach(el => el.value = '');
+  document.querySelectorAll('.radio-pill').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.check-pill').forEach(p => { p.classList.remove('on'); p.querySelector('input').checked = false; });
+  document.getElementById('file-list').innerHTML = '';
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('search-input').value = '';
+  const now = new Date();
+  const local = new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+  document.getElementById('f-date').value = local;
+  setScreen('screen-search');
+}
+
+document.getElementById('search-input').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+</script>
+</body>
+</html>
